@@ -70,7 +70,7 @@ func toansi(s tcell.Screen) []string {
 	if w == 0 || h == 0 {
 		return nil
 	}
-	return tcellansi.RangeStrings(s, 0, w, 0, h)
+	return tcellansi.ScreenContentToStrings(s, 0, w, 0, h)
 }
 
 func main() {

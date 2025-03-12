@@ -214,7 +214,7 @@ loop:
 			if ev.Key() == tcell.KeyEscape {
 				ecnt++
 				if ecnt > 1 {
-					screenStr = tcellansi.RangeStrings(s, 0, w, 0, h)
+					screenStr = tcellansi.ScreenContentToStrings(s, 0, w, 0, h)
 					s.Fini()
 					break loop
 				}

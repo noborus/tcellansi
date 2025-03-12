@@ -86,22 +86,19 @@ const resetStyle = "\x1b[0m"
 // Returns:
 //   - A slice of strings representing the screen content in the specified range.
 func ScreenContentToStrings(screen tcell.Screen, x1 int, x2 int, y1 int, y2 int) []string {
-	w, h := screen.Size()
-	if w == 0 || h == 0 {
-		return nil
-	}
-
 	var buf bytes.Buffer
 	var result []string
-	var prevStyle = tcell.StyleDefault
 	for row := y1; row < y2; row++ {
+		prevStyle := tcell.StyleDefault
 		for col := x1; col < x2; col++ {
-			main, combc, sty, width := screen.GetContent(col, row)
-			if sty != prevStyle {
-				buf.WriteString(resetStyle)
-				prevStyle = sty
+			main, combc, style, width := screen.GetContent(col, row)
+			if style != prevStyle {
+				if prevStyle != tcell.StyleDefault {
+					buf.WriteString(resetStyle)
+				}
+				prevStyle = style
 			}
-			styleStr := ToAnsi(sty)
+			styleStr := ToAnsi(style)
 			buf.WriteString(styleStr)
 			buf.WriteRune(main)
 			for _, c := range combc {

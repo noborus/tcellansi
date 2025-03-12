@@ -6,7 +6,7 @@ import (
 	"github.com/gdamore/tcell/v2"
 )
 
-func TestStyleToES(t *testing.T) {
+func TestToAnsi(t *testing.T) {
 	tests := []struct {
 		name  string
 		style tcell.Style
@@ -48,9 +48,34 @@ func TestStyleToES(t *testing.T) {
 			want:  "\x1b[3m",
 		},
 		{
+			name:  "bold attribute",
+			style: tcell.StyleDefault.Bold(true),
+			want:  "\x1b[1m",
+		},
+		{
+			name:  "dim attribute",
+			style: tcell.StyleDefault.Dim(true),
+			want:  "\x1b[2m",
+		},
+		{
 			name:  "underline attribute",
 			style: tcell.StyleDefault.Underline(true),
 			want:  "\x1b[4m",
+		},
+		{
+			name:  "blink attribute",
+			style: tcell.StyleDefault.Blink(true),
+			want:  "\x1b[5m",
+		},
+		{
+			name:  "reverse attribute",
+			style: tcell.StyleDefault.Reverse(true),
+			want:  "\x1b[7m",
+		},
+		{
+			name:  "strike through attribute",
+			style: tcell.StyleDefault.StrikeThrough(true),
+			want:  "\x1b[9m",
 		},
 		{
 			name:  "combined attributes",
@@ -104,7 +129,7 @@ func TestScreenContentToStrings(t *testing.T) {
 				return s
 			}(),
 			x1: 0, x2: 1, y1: 0, y2: 1,
-			want: []string{"\x1b[0m\x1b[38;5;9mA\x1b[0m\n"},
+			want: []string{"\x1b[38;5;9mA\x1b[0m\n"},
 		},
 		{
 			name: "multiple cells",
@@ -118,8 +143,8 @@ func TestScreenContentToStrings(t *testing.T) {
 			}(),
 			x1: 0, x2: 2, y1: 0, y2: 2,
 			want: []string{
-				"\x1b[0m\x1b[38;5;9mA\x1b[0m\x1b[48;5;12mB\x1b[0m\n",
-				"\x1b[0m\x1b[1mC\x1b[0m \x1b[0m\n",
+				"\x1b[38;5;9mA\x1b[0m\x1b[48;5;12mB\x1b[0m\n",
+				"\x1b[1mC\x1b[0m \x1b[0m\n",
 			},
 		},
 		{
@@ -132,6 +157,17 @@ func TestScreenContentToStrings(t *testing.T) {
 			}(),
 			x1: 0, x2: 2, y1: 0, y2: 1,
 			want: []string{"亜\x1b[0m\n"},
+		},
+		{
+			name: "combc characters",
+			screen: func() tcell.Screen {
+				s := tcell.NewSimulationScreen("")
+				s.Init()
+				s.SetContent(0, 0, 'A', []rune{'\u0301'}, tcell.StyleDefault.Foreground(tcell.ColorRed))
+				return s
+			}(),
+			x1: 0, x2: 2, y1: 0, y2: 1,
+			want: []string{"\x1b[38;5;9mÁ\x1b[0m \x1b[0m\n"},
 		},
 	}
 

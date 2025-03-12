@@ -34,7 +34,7 @@ func main() {
     ansiSeq := tcellansi.ToAnsi(style)
     screen.Fini()
 
-println(ansiSeq)
+    println(ansiSeq)
 }
 ```
 
