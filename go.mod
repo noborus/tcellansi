@@ -1,6 +1,6 @@
 module github.com/noborus/tcellansi
 
-go 1.25
+go 1.22
 
 require github.com/gdamore/tcell/v2 v2.8.1
 
