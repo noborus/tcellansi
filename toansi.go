@@ -7,8 +7,7 @@ import (
 	"github.com/gdamore/tcell/v2"
 )
 
-// StyleToANSI converts the tcell style to ANSI escape sequence.
-// StyleToANSI converts a tcell.Style to an ANSI escape sequence string.
+// ToAnsi converts the tcell style to an ANSI escape sequence.
 // It handles foreground color, background color, and various text attributes such as bold, italic, underline, etc.
 // The function supports both palette colors and RGB colors for foreground and background.
 //
@@ -17,16 +16,13 @@ import (
 //
 // Returns:
 //   - A string containing the ANSI escape sequence representing the given style.
-func StyleToANSI(style tcell.Style) string {
+func ToAnsi(style tcell.Style) string {
 	var ansi bytes.Buffer
 	fg, bg, attr := style.Decompose()
 
 	// Foreground color
 	if fg != tcell.ColorDefault {
-		if fg&^tcell.ColorValid == 0 {
-			// Palette color
-			ansi.WriteString(fmt.Sprintf("\x1b[38;5;%dm", int(fg)))
-		} else if fg&tcell.ColorIsRGB != 0 {
+		if fg&tcell.ColorIsRGB != 0 {
 			// RGB color
 			r, g, b := fg.RGB()
 			ansi.WriteString(fmt.Sprintf("\x1b[38;2;%d;%d;%dm", r, g, b))
@@ -38,10 +34,7 @@ func StyleToANSI(style tcell.Style) string {
 
 	// Background color
 	if bg != tcell.ColorDefault {
-		if bg&^tcell.ColorValid == 0 {
-			// Palette color
-			ansi.WriteString(fmt.Sprintf("\x1b[48;5;%dm", int(bg)))
-		} else if bg&tcell.ColorIsRGB != 0 {
+		if bg&tcell.ColorIsRGB != 0 {
 			// RGB color
 			r, g, b := bg.RGB()
 			ansi.WriteString(fmt.Sprintf("\x1b[48;2;%d;%d;%dm", r, g, b))
@@ -50,6 +43,7 @@ func StyleToANSI(style tcell.Style) string {
 			ansi.WriteString(fmt.Sprintf("\x1b[48;5;%dm", bg&^tcell.ColorValid))
 		}
 	}
+
 	// Style attributes (Bold, Italic, Underline, etc.)
 	if attr&tcell.AttrBold != 0 {
 		ansi.WriteString("\x1b[1m")
@@ -74,4 +68,53 @@ func StyleToANSI(style tcell.Style) string {
 		ansi.WriteString("\x1b[9m")
 	}
 	return ansi.String()
+}
+
+const resetStyle = "\x1b[0m"
+
+// ScreenContentToStrings converts the screen content to a slice of strings.
+// It reads the screen content from the specified range (x1, x2, y1, y2) and converts it to a slice of strings.
+// Each string in the slice represents a row of the screen content.
+//
+// Parameters:
+//   - screen: tcell.Screen to be converted.
+//   - x1: int, the starting column of the range.
+//   - x2: int, the ending column of the range.
+//   - y1: int, the starting row of the range.
+//   - y2: int, the ending row of the range.
+//
+// Returns:
+//   - A slice of strings representing the screen content in the specified range.
+func ScreenContentToStrings(screen tcell.Screen, x1 int, x2 int, y1 int, y2 int) []string {
+	w, h := screen.Size()
+	if w == 0 || h == 0 {
+		return nil
+	}
+
+	var buf bytes.Buffer
+	var result []string
+	var prevStyle = tcell.StyleDefault
+	for row := y1; row < y2; row++ {
+		for col := x1; col < x2; col++ {
+			main, combc, sty, width := screen.GetContent(col, row)
+			if sty != prevStyle {
+				buf.WriteString(resetStyle)
+				prevStyle = sty
+			}
+			styleStr := ToAnsi(sty)
+			buf.WriteString(styleStr)
+			buf.WriteRune(main)
+			for _, c := range combc {
+				buf.WriteRune(c)
+			}
+			if width > 1 {
+				col += 1
+			}
+		}
+		buf.WriteString(resetStyle)
+		buf.WriteRune('\n')
+		result = append(result, buf.String())
+		buf.Reset()
+	}
+	return result
 }
