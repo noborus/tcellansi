@@ -22,26 +22,14 @@ func ToAnsi(style tcell.Style) string {
 
 	// Foreground color
 	if fg != tcell.ColorDefault {
-		if fg&tcell.ColorIsRGB != 0 {
-			// RGB color
-			r, g, b := fg.RGB()
-			ansi.WriteString(fmt.Sprintf("\x1b[38;2;%d;%d;%dm", r, g, b))
-		} else {
-			// Other cases (treated as palette color)
-			ansi.WriteString(fmt.Sprintf("\x1b[38;5;%dm", fg&^tcell.ColorValid))
-		}
+		ansi.WriteString("\x1b[38;")
+		ansi.WriteString(colorToAnsi(fg, ";"))
 	}
 
 	// Background color
 	if bg != tcell.ColorDefault {
-		if bg&tcell.ColorIsRGB != 0 {
-			// RGB color
-			r, g, b := bg.RGB()
-			ansi.WriteString(fmt.Sprintf("\x1b[48;2;%d;%d;%dm", r, g, b))
-		} else {
-			// Other cases (treated as palette color)
-			ansi.WriteString(fmt.Sprintf("\x1b[48;5;%dm", bg&^tcell.ColorValid))
-		}
+		ansi.WriteString("\x1b[48;")
+		ansi.WriteString(colorToAnsi(bg, ";"))
 	}
 
 	// Style attributes (Bold, Italic, Underline, etc.)
@@ -55,9 +43,18 @@ func ToAnsi(style tcell.Style) string {
 		ansi.WriteString("\x1b[3m")
 	}
 	if attr&tcell.AttrUnderline != 0 {
+		/*
+			ansi.WriteString("\x1b[")
+			us := style.UnderlineStyle()
+			ansi.WriteString(underlineStyleToAnsi(us))
+			uc := style.UnderlineColor()
+			if uc != tcell.ColorDefault {
+				ansi.WriteString("\x1b[58:")
+				ansi.WriteString(colorToAnsi(uc, ":"))
+			}
+		*/
 		ansi.WriteString("\x1b[4m")
 	}
-
 	if attr&tcell.AttrBlink != 0 {
 		ansi.WriteString("\x1b[5m")
 	}
@@ -68,6 +65,31 @@ func ToAnsi(style tcell.Style) string {
 		ansi.WriteString("\x1b[9m")
 	}
 	return ansi.String()
+}
+
+func colorToAnsi(color tcell.Color, delm string) string {
+	if color&tcell.ColorIsRGB != 0 {
+		r, g, b := color.RGB()
+		return fmt.Sprintf("2%s%d%s%d%s%dm", delm, r, delm, g, delm, b)
+	}
+	return fmt.Sprintf("5%s%dm", delm, color&^tcell.ColorValid)
+}
+
+func underlineStyleToAnsi(style tcell.UnderlineStyle) string {
+	switch style {
+	case tcell.UnderlineStyleSolid:
+		return "4m"
+	case tcell.UnderlineStyleDouble:
+		return "4:2m"
+	case tcell.UnderlineStyleCurly:
+		return "4:3m"
+	case tcell.UnderlineStyleDotted:
+		return "4:4m"
+	case tcell.UnderlineStyleDashed:
+		return "4:5m"
+	default:
+		return "4m"
+	}
 }
 
 const resetStyle = "\x1b[0m"
