@@ -23,14 +23,22 @@ func ToAnsi(style tcell.Style) string {
 
 	// Foreground color
 	if fg != tcell.ColorDefault {
-		ansi.WriteString("\x1b[38;")
-		ansi.WriteString(colorToAnsi(fg, ";"))
+		if fg >= tcell.ColorValid && fg <= tcell.ColorWhite {
+			ansi.WriteString(color16ToAnsi(fg, true))
+		} else {
+			ansi.WriteString("\x1b[38;")
+			ansi.WriteString(colorToAnsi(fg, ";"))
+		}
 	}
 
 	// Background color
 	if bg != tcell.ColorDefault {
-		ansi.WriteString("\x1b[48;")
-		ansi.WriteString(colorToAnsi(bg, ";"))
+		if bg >= tcell.ColorValid && bg <= tcell.ColorWhite {
+			ansi.WriteString(color16ToAnsi(bg, false))
+		} else {
+			ansi.WriteString("\x1b[48;")
+			ansi.WriteString(colorToAnsi(bg, ";"))
+		}
 	}
 
 	// Style attributes (Bold, Italic, Underline, etc.)
@@ -91,6 +99,19 @@ func getUnderlineColor(style tcell.Style) tcell.Color {
 		}
 	}
 	return tcell.ColorDefault
+}
+
+func color16ToAnsi(color tcell.Color, fg bool) string {
+	if fg {
+		if (color - tcell.ColorValid) < 8 {
+			return fmt.Sprintf("\x1b[%dm", 30+(color-tcell.ColorValid))
+		}
+		return fmt.Sprintf("\x1b[%dm", 82+(color-tcell.ColorValid))
+	}
+	if (color - tcell.ColorValid) < 8 {
+		return fmt.Sprintf("\x1b[%dm", 40+(color-tcell.ColorValid))
+	}
+	return fmt.Sprintf("\x1b[%dm", 92+(color-tcell.ColorValid))
 }
 
 func colorToAnsi(color tcell.Color, delm string) string {

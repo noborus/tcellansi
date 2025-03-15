@@ -20,7 +20,7 @@ func TestToAnsi(t *testing.T) {
 		{
 			name:  "foreground color",
 			style: tcell.StyleDefault.Foreground(tcell.ColorRed),
-			want:  "\x1b[38;5;9m", // palette color processing
+			want:  "\x1b[91m", // palette color processing
 		},
 		{
 			name:  "foreground color256",
@@ -35,7 +35,7 @@ func TestToAnsi(t *testing.T) {
 		{
 			name:  "background color",
 			style: tcell.StyleDefault.Background(tcell.ColorBlue),
-			want:  "\x1b[48;5;12m", // palette color processing
+			want:  "\x1b[104m", // palette color processing
 		},
 		{
 			name:  "background colorRGB",
@@ -80,7 +80,7 @@ func TestToAnsi(t *testing.T) {
 		{
 			name:  "combined attributes",
 			style: tcell.StyleDefault.Foreground(tcell.ColorGreen).Background(tcell.ColorYellow).Bold(true).Underline(true),
-			want:  "\x1b[38;5;2m\x1b[48;5;11m\x1b[1m\x1b[4m", // palette color, palette color, bold, underline
+			want:  "\x1b[32m\x1b[103m\x1b[1m\x1b[4m", // palette color, palette color, bold, underline
 		},
 	}
 
