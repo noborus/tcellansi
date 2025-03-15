@@ -92,6 +92,13 @@ func TestToAnsi(t *testing.T) {
 		})
 	}
 }
+
+// SetLineContent sets a line of content on the screen at the specified row with the given style.
+func SetLineContent(screen tcell.Screen, row int, content string, style tcell.Style) {
+	for col, r := range content {
+		screen.SetContent(col, row, r, nil, style)
+	}
+}
 func TestScreenContentToStrings(t *testing.T) {
 	tests := []struct {
 		name   string
@@ -168,6 +175,39 @@ func TestScreenContentToStrings(t *testing.T) {
 			}(),
 			x1: 0, x2: 2, y1: 0, y2: 1,
 			want: []string{"\x1b[38;5;9mÁ\x1b[0m \x1b[0m\n"},
+		},
+		{
+			name: "underlineStyle",
+			screen: func() tcell.Screen {
+				s := tcell.NewSimulationScreen("")
+				s.Init()
+				s.SetContent(0, 0, 'A', nil, tcell.StyleDefault.Underline(true).Underline(tcell.UnderlineStyleCurly))
+				return s
+			}(),
+			x1: 0, x2: 1, y1: 0, y2: 1,
+			want: []string{"\x1b[4mA\x1b[0m\n"},
+		},
+		{
+			name: "single line",
+			screen: func() tcell.Screen {
+				s := tcell.NewSimulationScreen("")
+				s.Init()
+				SetLineContent(s, 0, "Hello, World!", tcell.StyleDefault.Foreground(tcell.ColorRed))
+				return s
+			}(),
+			x1: 0, x2: 13, y1: 0, y2: 1,
+			want: []string{"\x1b[38;5;9mHello, World!\x1b[0m\n"},
+		},
+		{
+			name: "over line",
+			screen: func() tcell.Screen {
+				s := tcell.NewSimulationScreen("")
+				s.Init()
+				SetLineContent(s, 0, "1234567890123456789012345678901234567890123456789012345678901234567890123456789あ", tcell.StyleDefault.Foreground(tcell.ColorRed))
+				return s
+			}(),
+			x1: 0, x2: 80, y1: 0, y2: 1,
+			want: []string{"\x1b[38;5;9m1234567890123456789012345678901234567890123456789012345678901234567890123456789\x1b[0m\n"},
 		},
 	}
 

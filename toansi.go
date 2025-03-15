@@ -3,6 +3,7 @@ package tcellansi
 import (
 	"bytes"
 	"fmt"
+	"reflect"
 
 	"github.com/gdamore/tcell/v2"
 )
@@ -43,17 +44,14 @@ func ToAnsi(style tcell.Style) string {
 		ansi.WriteString("\x1b[3m")
 	}
 	if attr&tcell.AttrUnderline != 0 {
-		/*
-			ansi.WriteString("\x1b[")
-			us := style.UnderlineStyle()
-			ansi.WriteString(underlineStyleToAnsi(us))
-			uc := style.UnderlineColor()
-			if uc != tcell.ColorDefault {
-				ansi.WriteString("\x1b[58:")
-				ansi.WriteString(colorToAnsi(uc, ":"))
-			}
-		*/
-		ansi.WriteString("\x1b[4m")
+		ansi.WriteString("\x1b[")
+		us := getUnderlineStyle(style)
+		ansi.WriteString(underlineStyleToAnsi(us))
+		uc := getUnderlineColor(style)
+		if uc != tcell.ColorDefault {
+			ansi.WriteString("\x1b[58:")
+			ansi.WriteString(colorToAnsi(uc, ":"))
+		}
 	}
 	if attr&tcell.AttrBlink != 0 {
 		ansi.WriteString("\x1b[5m")
@@ -67,6 +65,34 @@ func ToAnsi(style tcell.Style) string {
 	return ansi.String()
 }
 
+func getUnderlineStyle(style tcell.Style) tcell.UnderlineStyle {
+	v := reflect.ValueOf(style)
+	m := v.MethodByName("UnderlineStyle")
+	if m.IsValid() {
+		results := m.Call(nil)
+		if len(results) == 1 {
+			if us, ok := results[0].Interface().(tcell.UnderlineStyle); ok {
+				return us
+			}
+		}
+	}
+	return tcell.UnderlineStyleSolid
+}
+
+func getUnderlineColor(style tcell.Style) tcell.Color {
+	v := reflect.ValueOf(style)
+	m := v.MethodByName("UnderlineColor")
+	if m.IsValid() {
+		results := m.Call(nil)
+		if len(results) == 1 {
+			if uc, ok := results[0].Interface().(tcell.Color); ok {
+				return uc
+			}
+		}
+	}
+	return tcell.ColorDefault
+}
+
 func colorToAnsi(color tcell.Color, delm string) string {
 	if color&tcell.ColorIsRGB != 0 {
 		r, g, b := color.RGB()
@@ -75,6 +101,8 @@ func colorToAnsi(color tcell.Color, delm string) string {
 	return fmt.Sprintf("5%s%dm", delm, color&^tcell.ColorValid)
 }
 
+// underlineStyleToAnsi converts the tcell.UnderlineStyle to an ANSI escape sequence.
+// It converts the underline style to the corresponding ANSI escape sequence.
 func underlineStyleToAnsi(style tcell.UnderlineStyle) string {
 	switch style {
 	case tcell.UnderlineStyleSolid:
@@ -114,20 +142,23 @@ func ScreenContentToStrings(screen tcell.Screen, x1 int, x2 int, y1 int, y2 int)
 		prevStyle := tcell.StyleDefault
 		for col := x1; col < x2; col++ {
 			main, combc, style, width := screen.GetContent(col, row)
+			if width > 1 {
+				col += 1
+				if col >= x2 {
+					break
+				}
+			}
 			if style != prevStyle {
 				if prevStyle != tcell.StyleDefault {
 					buf.WriteString(resetStyle)
 				}
 				prevStyle = style
+				styleStr := ToAnsi(style)
+				buf.WriteString(styleStr)
 			}
-			styleStr := ToAnsi(style)
-			buf.WriteString(styleStr)
 			buf.WriteRune(main)
 			for _, c := range combc {
 				buf.WriteRune(c)
-			}
-			if width > 1 {
-				col += 1
 			}
 		}
 		buf.WriteString(resetStyle)
