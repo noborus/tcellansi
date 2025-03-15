@@ -136,7 +136,7 @@ func TestScreenContentToStrings(t *testing.T) {
 				return s
 			}(),
 			x1: 0, x2: 1, y1: 0, y2: 1,
-			want: []string{"\x1b[38;5;9mA\x1b[0m\n"},
+			want: []string{"\x1b[91mA\x1b[0m\n"},
 		},
 		{
 			name: "multiple cells",
@@ -150,7 +150,7 @@ func TestScreenContentToStrings(t *testing.T) {
 			}(),
 			x1: 0, x2: 2, y1: 0, y2: 2,
 			want: []string{
-				"\x1b[38;5;9mA\x1b[0m\x1b[48;5;12mB\x1b[0m\n",
+				"\x1b[91mA\x1b[0m\x1b[104mB\x1b[0m\n",
 				"\x1b[1mC\x1b[0m \x1b[0m\n",
 			},
 		},
@@ -174,7 +174,7 @@ func TestScreenContentToStrings(t *testing.T) {
 				return s
 			}(),
 			x1: 0, x2: 2, y1: 0, y2: 1,
-			want: []string{"\x1b[38;5;9mÁ\x1b[0m \x1b[0m\n"},
+			want: []string{"\x1b[91mÁ\x1b[0m \x1b[0m\n"},
 		},
 		{
 			name: "underlineStyle",
@@ -196,7 +196,7 @@ func TestScreenContentToStrings(t *testing.T) {
 				return s
 			}(),
 			x1: 0, x2: 13, y1: 0, y2: 1,
-			want: []string{"\x1b[38;5;9mHello, World!\x1b[0m\n"},
+			want: []string{"\x1b[91mHello, World!\x1b[0m\n"},
 		},
 		{
 			name: "over line",
@@ -207,7 +207,7 @@ func TestScreenContentToStrings(t *testing.T) {
 				return s
 			}(),
 			x1: 0, x2: 80, y1: 0, y2: 1,
-			want: []string{"\x1b[38;5;9m1234567890123456789012345678901234567890123456789012345678901234567890123456789\x1b[0m\n"},
+			want: []string{"\x1b[91m1234567890123456789012345678901234567890123456789012345678901234567890123456789\x1b[0m\n"},
 		},
 	}
 
