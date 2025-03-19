@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"reflect"
+	"strconv"
 
 	"github.com/gdamore/tcell/v2"
 )
@@ -23,24 +24,17 @@ func ToAnsi(style tcell.Style) string {
 
 	// Foreground color
 	if fg != tcell.ColorDefault {
-		if fg >= tcell.ColorValid && fg <= tcell.ColorWhite {
-			ansi.WriteString(color16ToAnsi(fg, true))
-		} else {
-			ansi.WriteString("\x1b[38;")
-			ansi.WriteString(colorToAnsi(fg, ";"))
-		}
+		ansi.WriteString("\x1b[")
+		ansi.WriteString(foregroundColorToAnsi(fg))
+		ansi.WriteString("m")
 	}
-
 	// Background color
 	if bg != tcell.ColorDefault {
-		if bg >= tcell.ColorValid && bg <= tcell.ColorWhite {
-			ansi.WriteString(color16ToAnsi(bg, false))
-		} else {
-			ansi.WriteString("\x1b[48;")
-			ansi.WriteString(colorToAnsi(bg, ";"))
-		}
-	}
+		ansi.WriteString("\x1b[")
+		ansi.WriteString(backgroundColorToAnsi(bg))
+		ansi.WriteString("m")
 
+	}
 	// Style attributes (Bold, Italic, Underline, etc.)
 	if attr&tcell.AttrBold != 0 {
 		ansi.WriteString("\x1b[1m")
@@ -52,14 +46,7 @@ func ToAnsi(style tcell.Style) string {
 		ansi.WriteString("\x1b[3m")
 	}
 	if attr&tcell.AttrUnderline != 0 {
-		ansi.WriteString("\x1b[")
-		us := getUnderlineStyle(style)
-		ansi.WriteString(underlineStyleToAnsi(us))
-		uc := getUnderlineColor(style)
-		if uc != tcell.ColorDefault {
-			ansi.WriteString("\x1b[58:")
-			ansi.WriteString(colorToAnsi(uc, ":"))
-		}
+		ansi.WriteString(underlineToAnsi(style))
 	}
 	if attr&tcell.AttrBlink != 0 {
 		ansi.WriteString("\x1b[5m")
@@ -73,6 +60,55 @@ func ToAnsi(style tcell.Style) string {
 	return ansi.String()
 }
 
+// foregroundColorToAnsi converts the foreground color to an ANSI escape sequence.
+func foregroundColorToAnsi(fg tcell.Color) string {
+	if fg > tcell.ColorWhite {
+		return "38;" + colorToAnsi(fg, ";")
+	}
+	if (fg - tcell.ColorValid) < 8 {
+		return strconv.Itoa(int(30 + (fg - tcell.ColorValid)))
+	}
+	return strconv.Itoa(int(82 + (fg - tcell.ColorValid)))
+}
+
+// backgroundColorToAnsi converts the background color to an ANSI escape sequence.
+func backgroundColorToAnsi(bg tcell.Color) string {
+	if bg > tcell.ColorWhite {
+		return "48;" + colorToAnsi(bg, ";")
+	}
+	if (bg - tcell.ColorValid) < 8 {
+		return strconv.Itoa(int(40 + (bg - tcell.ColorValid)))
+	}
+	return strconv.Itoa(int(92 + (bg - tcell.ColorValid)))
+}
+
+// colorToAnsi converts the tcell.Color to an ANSI escape sequence.
+func colorToAnsi(color tcell.Color, delm string) string {
+	if color&tcell.ColorIsRGB == 0 {
+		return fmt.Sprintf("5%s%d", delm, color&^tcell.ColorValid)
+	}
+	r, g, b := color.RGB()
+	return fmt.Sprintf("2%s%d%s%d%s%d", delm, r, delm, g, delm, b)
+}
+
+// underlineToAnsi converts the underline style and color to an ANSI escape sequence.
+func underlineToAnsi(style tcell.Style) string {
+	var ansi bytes.Buffer
+	ansi.WriteString("\x1b[")
+	us := getUnderlineStyle(style)
+	ansi.WriteString(underlineStyleToAnsi(us))
+	uc := getUnderlineColor(style)
+	if uc != tcell.ColorDefault {
+		ansi.WriteString("\x1b[58:")
+		ansi.WriteString(colorToAnsi(uc, ":"))
+	}
+	return ansi.String()
+}
+
+// getUnderlineStyle returns the underline style of the given style.
+// This is a temporary function to retrieve the underline style using reflection.
+// It assumes that the tcell.Style type has a method named "UnderlineStyle".
+// Once tcell officially supports UnderlineStyle, this function should be replaced.
 func getUnderlineStyle(style tcell.Style) tcell.UnderlineStyle {
 	v := reflect.ValueOf(style)
 	m := v.MethodByName("UnderlineStyle")
@@ -87,6 +123,10 @@ func getUnderlineStyle(style tcell.Style) tcell.UnderlineStyle {
 	return tcell.UnderlineStyleSolid
 }
 
+// getUnderlineColor returns the underline color of the given style.
+// This is a temporary function to retrieve the underline color using reflection.
+// It assumes that the tcell.Style type has a method named "UnderlineColor".
+// Once tcell officially supports UnderlineColor, this function should be replaced.
 func getUnderlineColor(style tcell.Style) tcell.Color {
 	v := reflect.ValueOf(style)
 	m := v.MethodByName("UnderlineColor")
@@ -99,27 +139,6 @@ func getUnderlineColor(style tcell.Style) tcell.Color {
 		}
 	}
 	return tcell.ColorDefault
-}
-
-func color16ToAnsi(color tcell.Color, fg bool) string {
-	if fg {
-		if (color - tcell.ColorValid) < 8 {
-			return fmt.Sprintf("\x1b[%dm", 30+(color-tcell.ColorValid))
-		}
-		return fmt.Sprintf("\x1b[%dm", 82+(color-tcell.ColorValid))
-	}
-	if (color - tcell.ColorValid) < 8 {
-		return fmt.Sprintf("\x1b[%dm", 40+(color-tcell.ColorValid))
-	}
-	return fmt.Sprintf("\x1b[%dm", 92+(color-tcell.ColorValid))
-}
-
-func colorToAnsi(color tcell.Color, delm string) string {
-	if color&tcell.ColorIsRGB != 0 {
-		r, g, b := color.RGB()
-		return fmt.Sprintf("2%s%d%s%d%s%dm", delm, r, delm, g, delm, b)
-	}
-	return fmt.Sprintf("5%s%dm", delm, color&^tcell.ColorValid)
 }
 
 // underlineStyleToAnsi converts the tcell.UnderlineStyle to an ANSI escape sequence.
