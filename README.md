@@ -1,5 +1,7 @@
 # tcellansi
 
+[![Go Reference](https://pkg.go.dev/badge/github.com/noborus/tcellansi.svg)](https://pkg.go.dev/github.com/noborus/tcellansi)
+
 `tcellansi` is a package for converting [tcell](https://github.com/gdamore/tcell) styles to ANSI escape sequences.
 
 ## Installation
