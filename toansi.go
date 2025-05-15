@@ -181,7 +181,7 @@ func ScreenContentToStrings(screen tcell.Screen, x1 int, x2 int, y1 int, y2 int)
 	for row := y1; row < y2; row++ {
 		prevStyle := tcell.StyleDefault
 		for col := x1; col < x2; col++ {
-			main, combc, style, width := screen.GetContent(col, row)
+			mainc, combc, style, width := screen.GetContent(col, row)
 			if width > 1 {
 				col += 1
 				if col >= x2 {
@@ -196,15 +196,47 @@ func ScreenContentToStrings(screen tcell.Screen, x1 int, x2 int, y1 int, y2 int)
 				styleStr := ToAnsi(style)
 				buf.WriteString(styleStr)
 			}
-			buf.WriteRune(main)
+			buf.WriteRune(mainc)
 			for _, c := range combc {
 				buf.WriteRune(c)
 			}
 		}
-		buf.WriteString(resetStyle)
+		if prevStyle != tcell.StyleDefault {
+			buf.WriteString(resetStyle)
+		}
 		buf.WriteRune('\n')
 		result = append(result, buf.String())
 		buf.Reset()
 	}
 	return result
+}
+
+// TrimRightSpaces trims trailing spaces from each line of the given screen content strings.
+// ANSI escape sequences are preserved.
+// TrimRightSpaces removes trailing spaces from each line in the given slice of strings.
+// If a line ends with a newline character, it trims spaces before the newline.
+// If the line ends with a specific reset style sequence before the newline, the original lines are returned unmodified.
+// The function preserves the newline character at the end of each line.
+func TrimRightSpaces(lines []string) []string {
+	trimmed := make([]string, len(lines))
+	for i, line := range lines {
+		n := len(line)
+		end := n
+		if n > 0 && line[n-1] == '\n' {
+			end--
+		}
+		// reset style
+		reset := ""
+		if end >= len(resetStyle) && line[end-len(resetStyle):end] == resetStyle {
+			trimmed[i] = line
+			continue
+		}
+
+		trimmedLine := line[:end]
+		for len(trimmedLine) > 0 && trimmedLine[len(trimmedLine)-1] == ' ' {
+			trimmedLine = trimmedLine[:len(trimmedLine)-1]
+		}
+		trimmed[i] = trimmedLine + reset + "\n"
+	}
+	return trimmed
 }

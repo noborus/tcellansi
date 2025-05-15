@@ -116,16 +116,16 @@ func TestScreenContentToStrings(t *testing.T) {
 			}(),
 			x1: 0, x2: 10, y1: 0, y2: 10,
 			want: []string{
-				"          \x1b[0m\n",
-				"          \x1b[0m\n",
-				"          \x1b[0m\n",
-				"          \x1b[0m\n",
-				"          \x1b[0m\n",
-				"          \x1b[0m\n",
-				"          \x1b[0m\n",
-				"          \x1b[0m\n",
-				"          \x1b[0m\n",
-				"          \x1b[0m\n"},
+				"          \n",
+				"          \n",
+				"          \n",
+				"          \n",
+				"          \n",
+				"          \n",
+				"          \n",
+				"          \n",
+				"          \n",
+				"          \n"},
 		},
 		{
 			name: "single cell",
@@ -133,10 +133,25 @@ func TestScreenContentToStrings(t *testing.T) {
 				s := tcell.NewSimulationScreen("")
 				s.Init()
 				s.SetContent(0, 0, 'A', nil, tcell.StyleDefault.Foreground(tcell.ColorRed))
+				s.SetContent(1, 0, ' ', nil, tcell.StyleDefault)
+				s.SetContent(2, 0, ' ', nil, tcell.StyleDefault)
 				return s
 			}(),
-			x1: 0, x2: 1, y1: 0, y2: 1,
-			want: []string{"\x1b[91mA\x1b[0m\n"},
+			x1: 0, x2: 3, y1: 0, y2: 1,
+			want: []string{"\x1b[91mA\x1b[0m  \n"},
+		},
+		{
+			name: "single cell2",
+			screen: func() tcell.Screen {
+				s := tcell.NewSimulationScreen("")
+				s.Init()
+				s.SetContent(0, 0, 'A', nil, tcell.StyleDefault.Foreground(tcell.ColorRed))
+				s.SetContent(1, 0, ' ', nil, tcell.StyleDefault.Background(tcell.ColorBlue))
+				s.SetContent(2, 0, ' ', nil, tcell.StyleDefault.Background(tcell.ColorBlue))
+				return s
+			}(),
+			x1: 0, x2: 3, y1: 0, y2: 1,
+			want: []string{"\x1b[91mA\x1b[0m\x1b[104m  \x1b[0m\n"},
 		},
 		{
 			name: "multiple cells",
@@ -151,7 +166,7 @@ func TestScreenContentToStrings(t *testing.T) {
 			x1: 0, x2: 2, y1: 0, y2: 2,
 			want: []string{
 				"\x1b[91mA\x1b[0m\x1b[104mB\x1b[0m\n",
-				"\x1b[1mC\x1b[0m \x1b[0m\n",
+				"\x1b[1mC\x1b[0m \n",
 			},
 		},
 		{
@@ -163,7 +178,7 @@ func TestScreenContentToStrings(t *testing.T) {
 				return s
 			}(),
 			x1: 0, x2: 2, y1: 0, y2: 1,
-			want: []string{"亜\x1b[0m\n"},
+			want: []string{"亜\n"},
 		},
 		{
 			name: "combc characters",
@@ -174,7 +189,7 @@ func TestScreenContentToStrings(t *testing.T) {
 				return s
 			}(),
 			x1: 0, x2: 2, y1: 0, y2: 1,
-			want: []string{"\x1b[91mÁ\x1b[0m \x1b[0m\n"},
+			want: []string{"\x1b[91mÁ\x1b[0m \n"},
 		},
 		{
 			name: "underlineStyle",
