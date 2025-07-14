@@ -101,6 +101,7 @@ func underlineToAnsi(style tcell.Style) string {
 	if uc != tcell.ColorDefault {
 		ansi.WriteString("\x1b[58:")
 		ansi.WriteString(colorToAnsi(uc, ":"))
+		ansi.WriteString("m")
 	}
 	return ansi.String()
 }
@@ -111,7 +112,7 @@ func underlineToAnsi(style tcell.Style) string {
 // Once tcell officially supports UnderlineStyle, this function should be replaced.
 func getUnderlineStyle(style tcell.Style) tcell.UnderlineStyle {
 	v := reflect.ValueOf(style)
-	m := v.MethodByName("UnderlineStyle")
+	m := v.MethodByName("GetUnderlineStyle")
 	if m.IsValid() {
 		results := m.Call(nil)
 		if len(results) == 1 {
@@ -129,7 +130,7 @@ func getUnderlineStyle(style tcell.Style) tcell.UnderlineStyle {
 // Once tcell officially supports UnderlineColor, this function should be replaced.
 func getUnderlineColor(style tcell.Style) tcell.Color {
 	v := reflect.ValueOf(style)
-	m := v.MethodByName("UnderlineColor")
+	m := v.MethodByName("GetUnderlineColor")
 	if m.IsValid() {
 		results := m.Call(nil)
 		if len(results) == 1 {

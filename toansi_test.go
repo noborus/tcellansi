@@ -200,7 +200,18 @@ func TestScreenContentToStrings(t *testing.T) {
 				return s
 			}(),
 			x1: 0, x2: 1, y1: 0, y2: 1,
-			want: []string{"\x1b[4mA\x1b[0m\n"},
+			want: []string{"\x1b[4:3mA\x1b[0m\n"},
+		},
+		{
+			name: "underlineColor",
+			screen: func() tcell.Screen {
+				s := tcell.NewSimulationScreen("")
+				s.Init()
+				s.SetContent(0, 0, 'A', nil, tcell.StyleDefault.Underline(true).Underline(tcell.GetColor("#00FF00")))
+				return s
+			}(),
+			x1: 0, x2: 1, y1: 0, y2: 1,
+			want: []string{"\x1b[4m\x1b[58:2:0:255:0mA\x1b[0m\n"}, // RGB color processing for underline
 		},
 		{
 			name: "single line",
