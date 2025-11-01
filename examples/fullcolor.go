@@ -17,7 +17,7 @@ func toansi(s tcell.Screen) []string {
 	if w == 0 || h == 0 {
 		return nil
 	}
-	return tcellansi.ScreenContentToStrings(s, 0, w, 0, h-1)
+	return tcellansi.TrimRightSpaces(tcellansi.ScreenContentToStrings(s, 0, w, 0, h-1))
 }
 
 // Draws a color grid on the screen
