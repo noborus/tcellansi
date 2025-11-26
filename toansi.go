@@ -182,7 +182,7 @@ func ScreenContentToStrings(screen tcell.Screen, x1 int, x2 int, y1 int, y2 int)
 	for row := y1; row < y2; row++ {
 		prevStyle := tcell.StyleDefault
 		for col := x1; col < x2; col++ {
-			mainc, combc, style, width := screen.GetContent(col, row)
+			str, style, width := screen.Get(col, row)
 			if width > 1 {
 				col += 1
 				if col >= x2 {
@@ -197,10 +197,7 @@ func ScreenContentToStrings(screen tcell.Screen, x1 int, x2 int, y1 int, y2 int)
 				styleStr := ToAnsi(style)
 				buf.WriteString(styleStr)
 			}
-			buf.WriteRune(mainc)
-			for _, c := range combc {
-				buf.WriteRune(c)
-			}
+			buf.WriteString(str)
 		}
 		if prevStyle != tcell.StyleDefault {
 			buf.WriteString(resetStyle)
