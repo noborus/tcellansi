@@ -1,7 +1,7 @@
 //go:build ignore
 // +build ignore
 
-// Copyright 2022 The TCell Authors
+// Copyright 2025 The TCell Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use file except in compliance with the License.
@@ -18,9 +18,6 @@
 // mouse displays a text box and tests mouse interaction.  As you click
 // and drag, boxes are displayed on screen.  Other events are reported in
 // the box.  Press ESC twice to exit the program.
-//
-// This example is based on the original `mouse.go` from the `tcell` library's `_demos` directory.
-// The final screen content will be output as ANSI escape sequences.
 package main
 
 import (
@@ -29,30 +26,15 @@ import (
 	"os/exec"
 	"runtime"
 
-	"github.com/gdamore/tcell/v2"
-	"github.com/gdamore/tcell/v2/encoding"
+	"github.com/gdamore/tcell/v3"
 	"github.com/noborus/tcellansi"
-
-	"github.com/mattn/go-runewidth"
 )
 
 var defStyle tcell.Style
 
-func emitStr(s tcell.Screen, x, y int, style tcell.Style, str string) {
-	for _, c := range str {
-		var comb []rune
-		w := runewidth.RuneWidth(c)
-		if w == 0 {
-			comb = []rune{c}
-			c = ' '
-			w = 1
-		}
-		s.SetContent(x, y, c, comb, style)
-		x += w
-	}
-}
-
 func drawBox(s tcell.Screen, x1, y1, x2, y2 int, style tcell.Style, r rune) {
+	rs := string(r)
+
 	if y2 < y1 {
 		y1, y2 = y2, y1
 	}
@@ -61,23 +43,23 @@ func drawBox(s tcell.Screen, x1, y1, x2, y2 int, style tcell.Style, r rune) {
 	}
 
 	for col := x1; col <= x2; col++ {
-		s.SetContent(col, y1, tcell.RuneHLine, nil, style)
-		s.SetContent(col, y2, tcell.RuneHLine, nil, style)
+		s.Put(col, y1, string(tcell.RuneHLine), style)
+		s.Put(col, y2, string(tcell.RuneHLine), style)
 	}
 	for row := y1 + 1; row < y2; row++ {
-		s.SetContent(x1, row, tcell.RuneVLine, nil, style)
-		s.SetContent(x2, row, tcell.RuneVLine, nil, style)
+		s.Put(x1, row, string(tcell.RuneVLine), style)
+		s.Put(x2, row, string(tcell.RuneVLine), style)
 	}
 	if y1 != y2 && x1 != x2 {
 		// Only add corners if we need to
-		s.SetContent(x1, y1, tcell.RuneULCorner, nil, style)
-		s.SetContent(x2, y1, tcell.RuneURCorner, nil, style)
-		s.SetContent(x1, y2, tcell.RuneLLCorner, nil, style)
-		s.SetContent(x2, y2, tcell.RuneLRCorner, nil, style)
+		s.Put(x1, y1, string(tcell.RuneULCorner), style)
+		s.Put(x2, y1, string(tcell.RuneURCorner), style)
+		s.Put(x1, y2, string(tcell.RuneLLCorner), style)
+		s.Put(x2, y2, string(tcell.RuneLRCorner), style)
 	}
 	for row := y1 + 1; row < y2; row++ {
 		for col := x1 + 1; col < x2; col++ {
-			s.SetContent(col, row, r, nil, style)
+			s.Put(col, row, rs, style)
 		}
 	}
 }
@@ -92,13 +74,13 @@ func drawSelect(s tcell.Screen, x1, y1, x2, y2 int, sel bool) {
 	}
 	for row := y1; row <= y2; row++ {
 		for col := x1; col <= x2; col++ {
-			mainc, combc, style, width := s.GetContent(col, row)
+			str, style, width := s.Get(col, row)
 			if style == tcell.StyleDefault {
 				style = defStyle
 			}
 			style = style.Reverse(sel)
-			s.SetContent(col, row, mainc, combc, style)
-			col += width - 1
+			s.Put(col, row, str, style)
+			col += width - 1 // add an extra column if 2 cells
 		}
 	}
 }
@@ -116,8 +98,6 @@ func main() {
 		}
 	}
 
-	encoding.Register()
-
 	s, e := tcell.NewScreen()
 	if e != nil {
 		fmt.Fprintf(os.Stderr, "%v\n", e)
@@ -127,12 +107,12 @@ func main() {
 		fmt.Fprintf(os.Stderr, "%v\n", e)
 		os.Exit(1)
 	}
+
 	s.SetTitle("Tcell Mouse Demonstration")
 	defStyle = tcell.StyleDefault.
 		Background(tcell.ColorReset).
 		Foreground(tcell.ColorReset)
 	s.SetStyle(defStyle)
-
 	s.EnableMouse()
 	s.EnablePaste()
 	s.EnableFocus()
@@ -143,7 +123,7 @@ func main() {
 	keyfmt := "Keys: %s"
 	pastefmt := "Paste: [%d] %s"
 	focusfmt := "Focus: %s"
-	white := tcell.StyleDefault.
+	style := tcell.StyleDefault.
 		Foreground(tcell.ColorMidnightBlue).Background(tcell.ColorLightCoral)
 
 	mx, my := -1, -1
@@ -157,31 +137,30 @@ func main() {
 	ecnt := 0
 	pasting := false
 	focus := true // assume we are focused when we start
-
 	var screenStr []string
 loop:
 	for {
-		drawBox(s, 1, 1, 42, 8, white, ' ')
-		emitStr(s, 2, 2, white, "Press ESC twice to exit, C to clear.")
-		emitStr(s, 2, 3, white, fmt.Sprintf(posfmt, mx, my))
-		emitStr(s, 2, 4, white, fmt.Sprintf(btnfmt, bstr))
-		emitStr(s, 2, 5, white, fmt.Sprintf(keyfmt, lks))
+		drawBox(s, 1, 1, 42, 8, style, ' ')
+		s.PutStrStyled(2, 2, "Press ESC twice to exit, C to clear.", style)
+		s.PutStrStyled(2, 3, fmt.Sprintf(posfmt, mx, my), style)
+		s.PutStrStyled(2, 4, fmt.Sprintf(btnfmt, bstr), style)
+		s.PutStrStyled(2, 5, fmt.Sprintf(keyfmt, lks), style)
 
 		ps := pstr
 		if len(ps) > 26 {
 			ps = "..." + ps[len(ps)-24:]
 		}
-		emitStr(s, 2, 6, white, fmt.Sprintf(pastefmt, len(pstr), ps))
+		s.PutStrStyled(2, 6, fmt.Sprintf(pastefmt, len(pstr), ps), style)
 
 		fstr := "false"
 		if focus {
 			fstr = "true"
 		}
-		emitStr(s, 2, 7, white, fmt.Sprintf(focusfmt, fstr))
+		s.PutStrStyled(2, 7, fmt.Sprintf(focusfmt, fstr), style)
 
 		s.Show()
 		bstr = ""
-		ev := s.PollEvent()
+		ev := <-s.EventQ()
 		st := tcell.StyleDefault.Background(tcell.ColorRed)
 		up := tcell.StyleDefault.
 			Background(tcell.ColorBlue).
@@ -196,13 +175,13 @@ loop:
 		switch ev := ev.(type) {
 		case *tcell.EventResize:
 			s.Sync()
-			s.SetContent(w-1, h-1, 'R', nil, st)
+			s.Put(w-1, h-1, "R", st)
 		case *tcell.EventKey:
-			s.SetContent(w-2, h-2, ev.Rune(), nil, st)
+			s.Put(w-2, h-2, ev.Str(), st)
 			if pasting {
-				s.SetContent(w-1, h-1, 'P', nil, st)
+				s.Put(w-1, h-1, "P", st)
 				if ev.Key() == tcell.KeyRune {
-					pstr = pstr + string(ev.Rune())
+					pstr = pstr + ev.Str()
 				} else {
 					pstr = pstr + "\ufffd" // replacement for now
 				}
@@ -210,13 +189,14 @@ loop:
 				continue
 			}
 			pstr = ""
-			s.SetContent(w-1, h-1, 'K', nil, st)
+			s.Put(w-1, h-1, "K", st)
 			if ev.Key() == tcell.KeyEscape {
 				ecnt++
 				if ecnt > 1 {
 					screenStr = tcellansi.ScreenContentToStrings(s, 0, w, 0, h)
 					s.Fini()
 					break loop
+					//os.Exit(0)
 				}
 			} else if ev.Key() == tcell.KeyCtrlL {
 				s.Sync()
@@ -236,7 +216,7 @@ loop:
 				}
 			} else {
 				ecnt = 0
-				if ev.Rune() == 'C' || ev.Rune() == 'c' {
+				if ev.Str() == "C" || ev.Str() == "c" {
 					s.Clear()
 				}
 			}
@@ -331,12 +311,12 @@ loop:
 				bx, by = x, y
 			}
 			lchar = ch
-			s.SetContent(w-1, h-1, 'M', nil, st)
+			s.Put(w-1, h-1, "M", st)
 			mx, my = x, y
 		case *tcell.EventFocus:
 			focus = ev.Focused
 		default:
-			s.SetContent(w-1, h-1, 'X', nil, st)
+			s.Put(w-1, h-1, "X", st)
 		}
 
 		if ox >= 0 && bx >= 0 {
