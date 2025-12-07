@@ -1,11 +1,11 @@
 //go:build ignore
 // +build ignore
 
-// Copyright 2015 The TCell Authors
+// Copyright 2025 The TCell Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// you may not use file except in compliance with the License.
+// You may obtain a copy of the license at
 //
 //    http://www.apache.org/licenses/LICENSE-2.0
 //
@@ -15,11 +15,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// boxes displays random colored boxes on your terminal screen.
-// Press ESC or Enter to exit the program.
-//
-// This example is based on the original `boxes.go` from the `tcell` library's `_demos` directory.
-// The final screen content will be output as ANSI escape sequences.
+// boxes just displays random colored boxes on your terminal screen.
+// Press ESC to exit the program.
 package main
 
 import (
@@ -28,7 +25,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/gdamore/tcell/v2"
+	"github.com/gdamore/tcell/v3"
 	"github.com/noborus/tcellansi"
 )
 
@@ -39,14 +36,14 @@ func makebox(s tcell.Screen) {
 		return
 	}
 
-	glyphs := []rune{'@', '#', '&', '*', '=', '%', 'Z', 'A'}
+	glyphs := []string{"@", "#", "&", "*", "=", "%", "Z", "A"}
 
 	lx := rand.Int() % w
 	ly := rand.Int() % h
 	lw := rand.Int() % (w - lx)
 	lh := rand.Int() % (h - ly)
 	st := tcell.StyleDefault
-	gl := ' '
+	gl := " "
 	if s.Colors() > 256 {
 		rgb := tcell.NewHexColor(int32(rand.Int() & 0xffffff))
 		st = st.Background(rgb)
@@ -59,7 +56,7 @@ func makebox(s tcell.Screen) {
 
 	for row := 0; row < lh; row++ {
 		for col := 0; col < lw; col++ {
-			s.SetCell(lx+col, ly+row, st, gl)
+			s.PutStrStyled(lx+col, ly+row, gl, st)
 		}
 	}
 	s.Show()
@@ -95,7 +92,7 @@ func main() {
 	quit := make(chan struct{})
 	go func() {
 		for {
-			ev := s.PollEvent()
+			ev := <-s.EventQ()
 			switch ev := ev.(type) {
 			case *tcell.EventKey:
 				switch ev.Key() {

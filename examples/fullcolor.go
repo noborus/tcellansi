@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/gdamore/tcell/v2"
+	"github.com/gdamore/tcell/v3"
 	"github.com/noborus/tcellansi"
 )
 
@@ -116,7 +116,7 @@ func mainLoop() []string {
 
 	// Event loop
 	for {
-		ev := s.PollEvent()
+		ev := <-s.EventQ()
 		switch ev := ev.(type) {
 		case *tcell.EventKey:
 			if ev.Key() == tcell.KeyUp {

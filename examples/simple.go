@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/gdamore/tcell/v2"
+	"github.com/gdamore/tcell/v3"
 	"github.com/noborus/tcellansi"
 )
 
@@ -19,7 +19,7 @@ func main() {
 	// Create a style
 	style := tcell.StyleDefault.Background(tcell.ColorBlue).Underline(true).Underline(tcell.ColorGreen).Underline(tcell.UnderlineStyleDouble)
 
-	setContents(screen, "Hello world!█", style)
+	screen.PutStrStyled(0, 0, "Hello world!█", style)
 
 	screen.Show()
 	// Convert the style to ANSI escape sequence
@@ -28,10 +28,4 @@ func main() {
 	screen.Fini()
 
 	fmt.Println(ansiSeq + "█Hello world!█")
-}
-
-func setContents(screen tcell.Screen, str string, style tcell.Style) {
-	for i, r := range str {
-		screen.SetContent(i, 0, r, nil, style)
-	}
 }

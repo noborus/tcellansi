@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"strconv"
 
-	"github.com/gdamore/tcell/v2"
+	"github.com/gdamore/tcell/v3"
 )
 
 // ToAnsi converts the tcell style to an ANSI escape sequence.
@@ -20,7 +20,8 @@ import (
 //   - A string containing the ANSI escape sequence representing the given style.
 func ToAnsi(style tcell.Style) string {
 	var ansi bytes.Buffer
-	fg, bg, attr := style.Decompose()
+	fg := style.GetForeground()
+	bg := style.GetBackground()
 
 	// Foreground color
 	if fg != tcell.ColorDefault {
@@ -35,26 +36,25 @@ func ToAnsi(style tcell.Style) string {
 		ansi.WriteString("m")
 
 	}
-	// Style attributes (Bold, Italic, Underline, etc.)
-	if attr&tcell.AttrBold != 0 {
+	if style.HasBold() {
 		ansi.WriteString("\x1b[1m")
 	}
-	if attr&tcell.AttrDim != 0 {
+	if style.HasDim() {
 		ansi.WriteString("\x1b[2m")
 	}
-	if attr&tcell.AttrItalic != 0 {
+	if style.HasItalic() {
 		ansi.WriteString("\x1b[3m")
 	}
-	if attr&tcell.AttrUnderline != 0 {
+	if style.HasUnderline() {
 		ansi.WriteString(underlineToAnsi(style))
 	}
-	if attr&tcell.AttrBlink != 0 {
+	if style.HasBlink() {
 		ansi.WriteString("\x1b[5m")
 	}
-	if attr&tcell.AttrReverse != 0 {
+	if style.HasReverse() {
 		ansi.WriteString("\x1b[7m")
 	}
-	if attr&tcell.AttrStrikeThrough != 0 {
+	if style.HasStrikeThrough() {
 		ansi.WriteString("\x1b[9m")
 	}
 	return ansi.String()
