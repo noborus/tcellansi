@@ -4,6 +4,14 @@
 
 `tcellansi` is a package for converting [tcell](https://github.com/gdamore/tcell) styles to ANSI escape sequences.
 
+## Version Compatibility
+
+- For **tcell v3**, use the latest `main` branch of this repository.
+- For **tcell v2**, use the `v2` branch:
+```sh
+  go get github.com/noborus/tcellansi@v2
+```
+
 ## Installation
 
 To install the package, run:
@@ -20,7 +28,7 @@ Here is a simple example of how to use `tcellansi`:
 package main
 
 import (
-	"github.com/gdamore/tcell/v2"
+	"github.com/gdamore/tcell/v3"
 	"github.com/noborus/tcellansi"
 )
 
