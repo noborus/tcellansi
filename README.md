@@ -7,9 +7,10 @@
 ## Version Compatibility
 
 - For **tcell v3**, use the latest `main` branch of this repository.
-- For **tcell v2**, use the `v2` branch:
+- For **tcell v2**, use the `v0.3.1` tag:
+
 ```sh
-  go get github.com/noborus/tcellansi@v2
+  go get github.com/noborus/tcellansi@v0.3.1
 ```
 
 ## Installation
