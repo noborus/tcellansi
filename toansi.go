@@ -184,7 +184,7 @@ func ScreenContentToStrings(screen tcell.Screen, x1 int, x2 int, y1 int, y2 int)
 		for col := x1; col < x2; col++ {
 			str, style, width := screen.Get(col, row)
 			if width > 1 {
-				col += 1
+				col++
 				if col >= x2 {
 					break
 				}
@@ -223,8 +223,6 @@ func TrimRightSpaces(lines []string) []string {
 		if n > 0 && line[n-1] == '\n' {
 			end--
 		}
-		// reset style
-		reset := ""
 		if end >= len(resetStyle) && line[end-len(resetStyle):end] == resetStyle {
 			trimmed[i] = line
 			continue
@@ -234,7 +232,7 @@ func TrimRightSpaces(lines []string) []string {
 		for len(trimmedLine) > 0 && trimmedLine[len(trimmedLine)-1] == ' ' {
 			trimmedLine = trimmedLine[:len(trimmedLine)-1]
 		}
-		trimmed[i] = trimmedLine + reset + "\n"
+		trimmed[i] = trimmedLine + "\n"
 	}
 	return trimmed
 }
