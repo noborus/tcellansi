@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/gdamore/tcell/v3"
+	"github.com/gdamore/tcell/v3/color"
 	"github.com/noborus/tcellansi"
 )
 
@@ -17,7 +18,7 @@ func main() {
 	screen.Init()
 
 	// Create a style
-	style := tcell.StyleDefault.Background(tcell.ColorBlue).Underline(true).Underline(tcell.ColorGreen).Underline(tcell.UnderlineStyleDouble)
+	style := tcell.StyleDefault.Background(color.Blue).Underline(true).Underline(color.Green).Underline(tcell.UnderlineStyleDouble)
 
 	screen.PutStrStyled(0, 0, "Hello world!█", style)
 

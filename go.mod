@@ -4,7 +4,7 @@ go 1.24.0
 
 toolchain go1.24.2
 
-require github.com/gdamore/tcell/v3 v3.0.3
+require github.com/gdamore/tcell/v3 v3.0.6
 
 require (
 	github.com/gdamore/encoding v1.0.1 // indirect
