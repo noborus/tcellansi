@@ -27,6 +27,7 @@ import (
 	"runtime"
 
 	"github.com/gdamore/tcell/v3"
+	"github.com/gdamore/tcell/v3/color"
 	"github.com/noborus/tcellansi"
 )
 
@@ -110,8 +111,8 @@ func main() {
 
 	s.SetTitle("Tcell Mouse Demonstration")
 	defStyle = tcell.StyleDefault.
-		Background(tcell.ColorReset).
-		Foreground(tcell.ColorReset)
+		Background(color.Reset).
+		Foreground(color.Reset)
 	s.SetStyle(defStyle)
 	s.EnableMouse()
 	s.EnablePaste()
@@ -124,7 +125,7 @@ func main() {
 	pastefmt := "Paste: [%d] %s"
 	focusfmt := "Focus: %s"
 	style := tcell.StyleDefault.
-		Foreground(tcell.ColorMidnightBlue).Background(tcell.ColorLightCoral)
+		Foreground(color.MidnightBlue).Background(color.LightCoral)
 
 	mx, my := -1, -1
 	ox, oy := -1, -1
@@ -161,10 +162,10 @@ loop:
 		s.Show()
 		bstr = ""
 		ev := <-s.EventQ()
-		st := tcell.StyleDefault.Background(tcell.ColorRed)
+		st := tcell.StyleDefault.Background(color.Red)
 		up := tcell.StyleDefault.
-			Background(tcell.ColorBlue).
-			Foreground(tcell.ColorBlack)
+			Background(color.Blue).
+			Foreground(color.Black)
 		w, h = s.Size()
 
 		// always clear any old selection box
@@ -266,21 +267,21 @@ loop:
 			if button != tcell.ButtonNone && ox < 0 {
 				ox, oy = x, y
 			}
-			theme := []tcell.Color{
-				tcell.ColorGray,
-				tcell.ColorRed,
-				tcell.ColorLime,
-				tcell.ColorYellow,
-				tcell.ColorFuchsia,
-				tcell.ColorBlue,
-				tcell.ColorAqua,
-				tcell.ColorSilver,
+			theme := []color.Color{
+				color.Gray,
+				color.Red,
+				color.Lime,
+				color.Yellow,
+				color.Fuchsia,
+				color.Blue,
+				color.Aqua,
+				color.Silver,
 			}
 			switch ev.Buttons() {
 			case tcell.ButtonNone:
 				if ox >= 0 {
 					bg := theme[lchar%8]
-					fg := tcell.ColorBlack
+					fg := color.Black
 					drawBox(s, ox, oy, x, y,
 						up.Background(bg).Foreground(fg),
 						lchar)

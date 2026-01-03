@@ -5,6 +5,7 @@ package main
 
 import (
 	"github.com/gdamore/tcell/v3"
+	"github.com/gdamore/tcell/v3/color"
 	"github.com/noborus/tcellansi"
 )
 
@@ -14,7 +15,7 @@ func main() {
 	screen.Init()
 
 	// Create a style
-	style := tcell.StyleDefault.Foreground(tcell.ColorRed).Background(tcell.ColorBlack)
+	style := tcell.StyleDefault.Foreground(color.Red).Background(color.Black)
 
 	// Convert the style to ANSI escape sequence
 	ansiSeq := tcellansi.ToAnsi(style)

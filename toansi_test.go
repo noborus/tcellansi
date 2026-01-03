@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/gdamore/tcell/v3"
+	"github.com/gdamore/tcell/v3/color"
 )
 
 func TestToAnsi(t *testing.T) {
@@ -19,12 +20,12 @@ func TestToAnsi(t *testing.T) {
 		},
 		{
 			name:  "foreground color",
-			style: tcell.StyleDefault.Foreground(tcell.ColorRed),
+			style: tcell.StyleDefault.Foreground(color.Red),
 			want:  "\x1b[91m", // palette color processing
 		},
 		{
 			name:  "foreground color256",
-			style: tcell.StyleDefault.Foreground(tcell.Color250),
+			style: tcell.StyleDefault.Foreground(color.Color(250)),
 			want:  "\x1b[38;5;250m", // updated palette color processing
 		},
 		{
@@ -34,7 +35,7 @@ func TestToAnsi(t *testing.T) {
 		},
 		{
 			name:  "background color",
-			style: tcell.StyleDefault.Background(tcell.ColorBlue),
+			style: tcell.StyleDefault.Background(color.Blue),
 			want:  "\x1b[104m", // palette color processing
 		},
 		{
@@ -79,7 +80,7 @@ func TestToAnsi(t *testing.T) {
 		},
 		{
 			name:  "combined attributes",
-			style: tcell.StyleDefault.Foreground(tcell.ColorGreen).Background(tcell.ColorYellow).Bold(true).Underline(true),
+			style: tcell.StyleDefault.Foreground(color.Green).Background(color.Yellow).Bold(true).Underline(true),
 			want:  "\x1b[32m\x1b[103m\x1b[1m\x1b[4m", // palette color, palette color, bold, underline
 		},
 	}
@@ -132,7 +133,7 @@ func TestScreenContentToStrings(t *testing.T) {
 			screen: func() tcell.Screen {
 				s := tcell.NewSimulationScreen("")
 				s.Init()
-				s.SetContent(0, 0, 'A', nil, tcell.StyleDefault.Foreground(tcell.ColorRed))
+				s.SetContent(0, 0, 'A', nil, tcell.StyleDefault.Foreground(color.Red))
 				s.SetContent(1, 0, ' ', nil, tcell.StyleDefault)
 				s.SetContent(2, 0, ' ', nil, tcell.StyleDefault)
 				return s
@@ -145,9 +146,9 @@ func TestScreenContentToStrings(t *testing.T) {
 			screen: func() tcell.Screen {
 				s := tcell.NewSimulationScreen("")
 				s.Init()
-				s.SetContent(0, 0, 'A', nil, tcell.StyleDefault.Foreground(tcell.ColorRed))
-				s.SetContent(1, 0, ' ', nil, tcell.StyleDefault.Background(tcell.ColorBlue))
-				s.SetContent(2, 0, ' ', nil, tcell.StyleDefault.Background(tcell.ColorBlue))
+				s.SetContent(0, 0, 'A', nil, tcell.StyleDefault.Foreground(color.Red))
+				s.SetContent(1, 0, ' ', nil, tcell.StyleDefault.Background(color.Blue))
+				s.SetContent(2, 0, ' ', nil, tcell.StyleDefault.Background(color.Blue))
 				return s
 			}(),
 			x1: 0, x2: 3, y1: 0, y2: 1,
@@ -158,8 +159,8 @@ func TestScreenContentToStrings(t *testing.T) {
 			screen: func() tcell.Screen {
 				s := tcell.NewSimulationScreen("")
 				s.Init()
-				s.SetContent(0, 0, 'A', nil, tcell.StyleDefault.Foreground(tcell.ColorRed))
-				s.SetContent(1, 0, 'B', nil, tcell.StyleDefault.Background(tcell.ColorBlue))
+				s.SetContent(0, 0, 'A', nil, tcell.StyleDefault.Foreground(color.Red))
+				s.SetContent(1, 0, 'B', nil, tcell.StyleDefault.Background(color.Blue))
 				s.SetContent(0, 1, 'C', nil, tcell.StyleDefault.Bold(true))
 				return s
 			}(),
@@ -185,7 +186,7 @@ func TestScreenContentToStrings(t *testing.T) {
 			screen: func() tcell.Screen {
 				s := tcell.NewSimulationScreen("")
 				s.Init()
-				s.SetContent(0, 0, 'A', []rune{'\u0301'}, tcell.StyleDefault.Foreground(tcell.ColorRed))
+				s.SetContent(0, 0, 'A', []rune{'\u0301'}, tcell.StyleDefault.Foreground(color.Red))
 				return s
 			}(),
 			x1: 0, x2: 2, y1: 0, y2: 1,
@@ -218,7 +219,7 @@ func TestScreenContentToStrings(t *testing.T) {
 			screen: func() tcell.Screen {
 				s := tcell.NewSimulationScreen("")
 				s.Init()
-				SetLineContent(s, 0, "Hello, World!", tcell.StyleDefault.Foreground(tcell.ColorRed))
+				SetLineContent(s, 0, "Hello, World!", tcell.StyleDefault.Foreground(color.Red))
 				return s
 			}(),
 			x1: 0, x2: 13, y1: 0, y2: 1,
@@ -229,7 +230,7 @@ func TestScreenContentToStrings(t *testing.T) {
 			screen: func() tcell.Screen {
 				s := tcell.NewSimulationScreen("")
 				s.Init()
-				SetLineContent(s, 0, "1234567890123456789012345678901234567890123456789012345678901234567890123456789あ", tcell.StyleDefault.Foreground(tcell.ColorRed))
+				SetLineContent(s, 0, "1234567890123456789012345678901234567890123456789012345678901234567890123456789あ", tcell.StyleDefault.Foreground(color.Red))
 				return s
 			}(),
 			x1: 0, x2: 80, y1: 0, y2: 1,

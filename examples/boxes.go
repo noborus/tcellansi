@@ -26,6 +26,7 @@ import (
 	"time"
 
 	"github.com/gdamore/tcell/v3"
+	"github.com/gdamore/tcell/v3/color"
 	"github.com/noborus/tcellansi"
 )
 
@@ -48,7 +49,7 @@ func makebox(s tcell.Screen) {
 		rgb := tcell.NewHexColor(int32(rand.Int() & 0xffffff))
 		st = st.Background(rgb)
 	} else if s.Colors() > 1 {
-		st = st.Background(tcell.Color(rand.Int()%s.Colors()) | tcell.ColorValid)
+		st = st.Background(color.Color(rand.Int()%s.Colors()) | color.IsValid)
 	} else {
 		st = st.Reverse(rand.Int()%2 == 0)
 		gl = glyphs[rand.Int()%len(glyphs)]
@@ -84,8 +85,8 @@ func main() {
 	}
 	/*
 		s.SetStyle(tcell.StyleDefault.
-			Foreground(tcell.ColorBlack).
-			Background(tcell.ColorWhite))
+			Foreground(color.Black).
+			Background(color.White))
 	*/
 	s.Clear()
 

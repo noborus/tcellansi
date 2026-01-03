@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/gdamore/tcell/v3"
+	"github.com/gdamore/tcell/v3/color"
 	"github.com/noborus/tcellansi"
 )
 
@@ -25,14 +26,14 @@ func drawColorGrid(s tcell.Screen) {
 	// System colors (0..15)
 	for y := 0; y < 2; y++ {
 		for x := 0; x < 8; x++ {
-			style := tcell.StyleDefault.Background(tcell.ColorValid + tcell.Color(x+y*8))
+			style := tcell.StyleDefault.Background(color.IsValid + color.Color(x+y*8))
 			s.SetContent(x*2, y, ' ', nil, style)
 			s.SetContent(x*2+1, y, ' ', nil, style)
 		}
 	}
 
 	// Color cube (16..231)
-	idx := tcell.ColorWhite + 1
+	idx := color.White + 1
 	for r := 0; r < 6; r++ {
 		for g := 0; g < 6; g++ {
 			x := r * 7
@@ -49,7 +50,7 @@ func drawColorGrid(s tcell.Screen) {
 
 	// Grayscale ramp (232..255)
 	for i := 232; i < 256; i++ {
-		style := tcell.StyleDefault.Background(tcell.ColorValid + tcell.Color(i))
+		style := tcell.StyleDefault.Background(color.IsValid + color.Color(i))
 		s.SetContent((i-232)*2, 12, ' ', nil, style)
 		s.SetContent((i-232)*2+1, 12, ' ', nil, style)
 	}
