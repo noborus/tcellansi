@@ -5,7 +5,17 @@ import (
 
 	"github.com/gdamore/tcell/v3"
 	"github.com/gdamore/tcell/v3/color"
+	"github.com/gdamore/tcell/v3/mock"
 )
+
+func newMockScreen(t *testing.T) tcell.Screen {
+	mt := mock.NewMockTerm()
+	s, err := tcell.NewTerminfoScreenFromTty(mt)
+	if err != nil {
+		t.Fatalf("Failed to create screen: %v", err)
+	}
+	return s
+}
 
 func TestToAnsi(t *testing.T) {
 	tests := []struct {
@@ -25,7 +35,7 @@ func TestToAnsi(t *testing.T) {
 		},
 		{
 			name:  "foreground color256",
-			style: tcell.StyleDefault.Foreground(color.Color(250)),
+			style: tcell.StyleDefault.Foreground(color.XTerm250),
 			want:  "\x1b[38;5;250m", // updated palette color processing
 		},
 		{
@@ -88,7 +98,7 @@ func TestToAnsi(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := ToAnsi(tt.style); got != tt.want {
-				t.Errorf("StyleToES() = %v, want %v", got, tt.want)
+				t.Errorf("StyleToES() = %#v, want %#v", got, tt.want)
 			}
 		})
 	}
@@ -111,7 +121,7 @@ func TestScreenContentToStrings(t *testing.T) {
 		{
 			name: "empty screen",
 			screen: func() tcell.Screen {
-				s := tcell.NewSimulationScreen("")
+				s := newMockScreen(t)
 				s.Init()
 				return s
 			}(),
@@ -131,7 +141,7 @@ func TestScreenContentToStrings(t *testing.T) {
 		{
 			name: "single cell",
 			screen: func() tcell.Screen {
-				s := tcell.NewSimulationScreen("")
+				s := newMockScreen(t)
 				s.Init()
 				s.SetContent(0, 0, 'A', nil, tcell.StyleDefault.Foreground(color.Red))
 				s.SetContent(1, 0, ' ', nil, tcell.StyleDefault)
@@ -144,7 +154,7 @@ func TestScreenContentToStrings(t *testing.T) {
 		{
 			name: "single cell2",
 			screen: func() tcell.Screen {
-				s := tcell.NewSimulationScreen("")
+				s := newMockScreen(t)
 				s.Init()
 				s.SetContent(0, 0, 'A', nil, tcell.StyleDefault.Foreground(color.Red))
 				s.SetContent(1, 0, ' ', nil, tcell.StyleDefault.Background(color.Blue))
@@ -157,7 +167,7 @@ func TestScreenContentToStrings(t *testing.T) {
 		{
 			name: "multiple cells",
 			screen: func() tcell.Screen {
-				s := tcell.NewSimulationScreen("")
+				s := newMockScreen(t)
 				s.Init()
 				s.SetContent(0, 0, 'A', nil, tcell.StyleDefault.Foreground(color.Red))
 				s.SetContent(1, 0, 'B', nil, tcell.StyleDefault.Background(color.Blue))
@@ -173,7 +183,7 @@ func TestScreenContentToStrings(t *testing.T) {
 		{
 			name: "wide character",
 			screen: func() tcell.Screen {
-				s := tcell.NewSimulationScreen("")
+				s := newMockScreen(t)
 				s.Init()
 				s.SetContent(0, 0, '亜', nil, tcell.StyleDefault)
 				return s
@@ -184,7 +194,7 @@ func TestScreenContentToStrings(t *testing.T) {
 		{
 			name: "combc characters",
 			screen: func() tcell.Screen {
-				s := tcell.NewSimulationScreen("")
+				s := newMockScreen(t)
 				s.Init()
 				s.SetContent(0, 0, 'A', []rune{'\u0301'}, tcell.StyleDefault.Foreground(color.Red))
 				return s
@@ -195,7 +205,7 @@ func TestScreenContentToStrings(t *testing.T) {
 		{
 			name: "underlineStyle",
 			screen: func() tcell.Screen {
-				s := tcell.NewSimulationScreen("")
+				s := newMockScreen(t)
 				s.Init()
 				s.SetContent(0, 0, 'A', nil, tcell.StyleDefault.Underline(true).Underline(tcell.UnderlineStyleCurly))
 				return s
@@ -206,7 +216,7 @@ func TestScreenContentToStrings(t *testing.T) {
 		{
 			name: "underlineColor",
 			screen: func() tcell.Screen {
-				s := tcell.NewSimulationScreen("")
+				s := newMockScreen(t)
 				s.Init()
 				s.SetContent(0, 0, 'A', nil, tcell.StyleDefault.Underline(true).Underline(tcell.GetColor("#00FF00")))
 				return s
@@ -217,7 +227,7 @@ func TestScreenContentToStrings(t *testing.T) {
 		{
 			name: "single line",
 			screen: func() tcell.Screen {
-				s := tcell.NewSimulationScreen("")
+				s := newMockScreen(t)
 				s.Init()
 				SetLineContent(s, 0, "Hello, World!", tcell.StyleDefault.Foreground(color.Red))
 				return s
@@ -228,7 +238,7 @@ func TestScreenContentToStrings(t *testing.T) {
 		{
 			name: "over line",
 			screen: func() tcell.Screen {
-				s := tcell.NewSimulationScreen("")
+				s := newMockScreen(t)
 				s.Init()
 				SetLineContent(s, 0, "1234567890123456789012345678901234567890123456789012345678901234567890123456789あ", tcell.StyleDefault.Foreground(color.Red))
 				return s
