@@ -66,7 +66,6 @@ func drawBox(s tcell.Screen, x1, y1, x2, y2 int, style tcell.Style, r rune) {
 }
 
 func drawSelect(s tcell.Screen, x1, y1, x2, y2 int, sel bool) {
-
 	if y2 < y1 {
 		y1, y2 = y2, y1
 	}
@@ -89,7 +88,6 @@ func drawSelect(s tcell.Screen, x1, y1, x2, y2 int, sel bool) {
 // This program just shows simple mouse and keyboard events.  Press ESC twice to
 // exit.
 func main() {
-
 	shell := os.Getenv("SHELL")
 	if shell == "" {
 		if runtime.GOOS == "windows" {
@@ -197,7 +195,7 @@ loop:
 					screenStr = tcellansi.ScreenContentToStrings(s, 0, w, 0, h)
 					s.Fini()
 					break loop
-					//os.Exit(0)
+					// os.Exit(0)
 				}
 			} else if ev.Key() == tcell.KeyCtrlL {
 				s.Sync()
