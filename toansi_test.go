@@ -5,11 +5,11 @@ import (
 
 	"github.com/gdamore/tcell/v3"
 	"github.com/gdamore/tcell/v3/color"
-	"github.com/gdamore/tcell/v3/mock"
+	"github.com/gdamore/tcell/v3/vt"
 )
 
 func newMockScreen(t *testing.T) tcell.Screen {
-	mt := mock.NewMockTerm()
+	mt := vt.NewMockTerm()
 	s, err := tcell.NewTerminfoScreenFromTty(mt)
 	if err != nil {
 		t.Fatalf("Failed to create screen: %v", err)
@@ -110,6 +110,7 @@ func SetLineContent(screen tcell.Screen, row int, content string, style tcell.St
 		screen.SetContent(col, row, r, nil, style)
 	}
 }
+
 func TestScreenContentToStrings(t *testing.T) {
 	tests := []struct {
 		name   string
@@ -136,7 +137,8 @@ func TestScreenContentToStrings(t *testing.T) {
 				"          \n",
 				"          \n",
 				"          \n",
-				"          \n"},
+				"          \n",
+			},
 		},
 		{
 			name: "single cell",
