@@ -2,16 +2,11 @@
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/noborus/tcellansi.svg)](https://pkg.go.dev/github.com/noborus/tcellansi)
 
-`tcellansi` is a package for converting [tcell](https://github.com/gdamore/tcell) styles to ANSI escape sequences.
+`tcellansi` is a package for converting [tcell](https://github.com/gdamore/tcell)v3 styles to ANSI escape sequences.
 
 ## Version Compatibility
 
 - For **tcell v3**, use the latest `main` branch of this repository.
-- For **tcell v2**, use the `v0.3.1` tag:
-
-```sh
-  go get github.com/noborus/tcellansi@v0.3.1
-```
 
 ## Installation
 
